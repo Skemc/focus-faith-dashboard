@@ -1,9 +1,19 @@
-import React from "react";
+import React, {useEffect} from "react";
 import clsx from "clsx";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useHistory,
+  useLocation,
+} from "react-router-dom";
 import FloatingActionButtons from "./FloatingButton.jsx";
-import StickyHeadTable from "./NewsComponent.jsx";
+import verifyToken from '../helpers/verifyToken';
+import NewsTable from "./NewsComponent.jsx";
 import TextEditor from "./TextEditor.jsx";
 import AddNews from "./AddNews.jsx";
+import AddUser from "./AddUsers.jsx";
 import logo from "../assets/img/logo.png";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
@@ -16,6 +26,7 @@ import Divider from "@material-ui/core/Divider";
 import TvIcon from "@material-ui/icons/Tv";
 import AlbumIcon from "@material-ui/icons/Album";
 import DescriptionIcon from "@material-ui/icons/Description";
+import PeopleAltRoundedIcon from "@material-ui/icons/PeopleAltRounded";
 import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import PersonIcon from "@material-ui/icons/Person";
 import VpnKeyIcon from "@material-ui/icons/VpnKey";
@@ -27,6 +38,7 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
+import UsersTable from "./Users.jsx";
 
 const drawerWidth = 240;
 
@@ -107,11 +119,29 @@ const useStyles = makeStyles((theme) => ({
 const Dashboard = () => {
   const classes = useStyles();
   const theme = useTheme();
+  let history = useHistory();
+  let location = useLocation();
   const [open, setOpen] = React.useState(false);
-  const [openModal, setOpenModal] = React.useState(false);
+  const [openNewsModal, setOpenNewsModal] = React.useState(false);
+  const [openUserModal, setOpenUserModal] = React.useState(false);
+   const [user, setUser] = React.useState({
+        firstName: '',
+        lastName: ''
+    });
+  const [role, setRole] = React.useState('');
+  const [path, setPath] = React.useState('')
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const {payload} = verifyToken(token)
+    setUser({ firstName: payload.firstname, lastName: payload.lastname });
+    setRole(payload.role);
+  }, []);
 
   const handleDrawerOpen = () => {
     setOpen(true);
+  };
+  const handleUsers = () => {
+    setShowUsers(true);
   };
 
   const handleDrawerClose = () => {
@@ -119,87 +149,118 @@ const Dashboard = () => {
   };
 
   return (
-    <div className={classes.root}>
-      <CssBaseline />
-      <AppBar
-        position="fixed"
-        className={clsx(classes.appBar, {
-          [classes.appBarShift]: open,
-        })}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            className={clsx(classes.menuButton, {
-              [classes.hide]: open,
-            })}
-          >
-            <MenuIcon />
-          </IconButton>
-          <img src={logo} className={classes.logo} />
-        </Toolbar>
-      </AppBar>
-      <AddNews open={openModal} />
-      <Drawer
-        variant="permanent"
-        className={clsx(classes.drawer, {
-          [classes.drawerOpen]: open,
-          [classes.drawerClose]: !open,
-        })}
-        classes={{
-          paper: clsx({
+    <Router>
+      <div className={classes.root}>
+        <CssBaseline />
+        <AppBar
+          position="fixed"
+          className={clsx(classes.appBar, {
+            [classes.appBarShift]: open,
+          })}
+        >
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              className={clsx(classes.menuButton, {
+                [classes.hide]: open,
+              })}
+            >
+              <MenuIcon />
+            </IconButton>
+            <img src={logo} className={classes.logo} />
+          </Toolbar>
+        </AppBar>
+        <AddNews open={openNewsModal} />
+        <AddUser open={openUserModal} />
+        <Drawer
+          variant="permanent"
+          className={clsx(classes.drawer, {
             [classes.drawerOpen]: open,
             [classes.drawerClose]: !open,
-          }),
-        }}
-      >
-        <div>
-          <PersonIcon className={classes.avatar} />
-          <span className={classes.avatarName}>Jordan Kayinamura</span>
-        </div>
-        <div className={classes.toolbar}>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "rtl" ? (
-              <ChevronRightIcon />
-            ) : (
-              <ChevronLeftIcon />
-            )}
-          </IconButton>
-        </div>
-        <List style={{ height: "698px" }}>
-          {[
-            { text: "News", icon: <DescriptionIcon /> },
-            { text: "TV Shows", icon: <TvIcon /> },
-            { text: "Music", icon: <AlbumIcon /> },
-          ].map((item, index) => (
-            <ListItem button key={item.text}>
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+          })}
+          classes={{
+            paper: clsx({
+              [classes.drawerOpen]: open,
+              [classes.drawerClose]: !open,
+            }),
+          }}
+        >
+          <div>
+            <PersonIcon className={classes.avatar} />
+            <span
+              className={classes.avatarName}
+            >{`${user.firstName} ${user.lastName}`}</span>
+          </div>
+          <div className={classes.toolbar}>
+            <IconButton onClick={handleDrawerClose}>
+              {theme.direction === "rtl" ? (
+                <ChevronRightIcon />
+              ) : (
+                <ChevronLeftIcon />
+              )}
+            </IconButton>
+          </div>
+          <List style={{ height: "698px" }}>
+            {[
+              { text: "News", icon: <DescriptionIcon />, path: "/", onClick: () => setPath('/news') },
+              { text: "TV Shows", icon: <TvIcon />, path: "/" },
+              { text: "Music", icon: <AlbumIcon />, path: "/" },
+              role === "admin"
+                ? {
+                    text: "Users",
+                    icon: <PeopleAltRoundedIcon />,
+                    path: "/users",
+                    onClick: () => setPath('/users')
+                  }
+                : "",
+            ].map((item, index) => (
+              <Link to={item.path}>
+                <ListItem button key={item.text} onClick={item.onClick}>
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.text} />
+                </ListItem>
+              </Link>
+            ))}
+          </List>
+          <Divider />
+          <List>
+              <Link to="/signin">
+            <ListItem button>
+              <ListItemIcon>
+                <ExitToAppIcon />
+              </ListItemIcon>
+                <ListItemText primary="Sign out" />
             </ListItem>
-          ))}
-        </List>
-        <Divider />
-        <List>
-          <ListItem button>
-            <ListItemIcon>
-              <ExitToAppIcon />
-            </ListItemIcon>
-            <ListItemText primary="Sign out" />
-          </ListItem>
-        </List>
-      </Drawer>
-      <main className={classes.content}>
-        <div className={classes.toolbar} />
-        <Typography paragraph>
-          <StickyHeadTable />
-          {/* <TextEditor/> */}
-        </Typography>
-        <FloatingActionButtons onClick={() => setOpenModal(true)} />
-      </main>
-    </div>
+              </Link>
+          </List>
+        </Drawer>
+        <main className={classes.content}>
+          <Switch>
+            <Route path="/" exact component={NewsTable} />
+            <Route path="/users" component={UsersTable} />
+          </Switch>
+          <FloatingActionButtons onClick={() => {
+            console.log(
+              "history",
+              window.location.pathname,
+              "sleep",
+              path
+            );
+            if (window.location.pathname === "/users") {
+              setOpenNewsModal(false);
+              setOpenUserModal(true);
+              return;
+            }
+            setOpenUserModal(false);
+            setOpenNewsModal(true)
+            console.log('state', openNewsModal, openUserModal);
+          }}/>
+        </main>
+      </div>
+    </Router>
   );
 };
 

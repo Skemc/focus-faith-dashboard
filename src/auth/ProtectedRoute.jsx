@@ -1,7 +1,7 @@
 import React from "react";
 import { createBrowserHistory } from "history";
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
-import verifyToken from "../helpers/tokenHelper";
+import tokenHelper from "../helpers/tokenHelper";
 import queryString from "query-string";
 
 export const PrivateRoute = ({ component: Component, ...rest }) => {
@@ -21,7 +21,7 @@ export const PrivateRoute = ({ component: Component, ...rest }) => {
       <Route
         {...rest}
         render={(props) => {
-          const decodedToken = verifyToken(getToken());
+          const decodedToken = tokenHelper(getToken());
           return decodedToken ? (
             <Component {...props} />
           ) : (

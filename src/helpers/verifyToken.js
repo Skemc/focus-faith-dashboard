@@ -3,15 +3,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const tokenHelper = token => {
+const verifyToken = token => {
   try {
     const decodedToken = verify(token, 'QWERTYUIOZXCVBNMGFDS');
-    if (!decodedToken) {
-      return false;
-    }
-    return true;
+    return decodedToken;
   } catch (error) {
     return false;
   }
 };
-export default tokenHelper;
+export default verifyToken;
