@@ -13,7 +13,7 @@ import {
   FormControl,
   InputLabel,
 } from "@material-ui/core";
-
+import Axios from 'axios';
 const useStyles = makeStyles((theme) => ({
   modal: {
     display: "flex",
@@ -26,12 +26,38 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
   },
+  text: {
+    margin: "10px",
+  },
+
+  formControl: {
+    width: "40%",
+    margin: "10px",
+  },
 }));
 
 export default function AddUser(props) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [user, setUser] = React.useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: ''
+  });
 
+  const handleChangeRole = (event) => {
+    setUser({...user, role: event.target.value})
+  }
+  const handleChangeFirst = (event) => {
+    setUser({...user, firstName: event.target.value})
+  }
+  const handleChangeLast = (event) => {
+    setUser({...user, lastName: event.target.value})
+  }
+  const handleChangeEmail = (event) => {
+    setUser({...user, email: event.target.value})
+  };
   const handleOpen = () => {
     setOpen(true);
   };
@@ -40,9 +66,19 @@ export default function AddUser(props) {
     setOpen(false);
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const results = await Axios.post("http://localhost:3000/api/new-user", {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+    });
+    console.log("Submittted==================*******", results);
+    // history.push('/');
+  };
   return (
     <div>
-      {console.log(props)}
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
@@ -56,13 +92,13 @@ export default function AddUser(props) {
         }}
       >
         <Fade in={props.open}>
-                    <Container maxWidth="md">
+           <Container maxWidth="sm">
             <Grid
               spacing={3}
               style={{
                 backgroundColor: "white",
-                paddingRight: "50px",
-                paddingLeft: "50px",
+                paddingRight: "30px",
+                paddingLeft: "30px",
                 paddingTop: "20px",
                 paddingBottom: "20px",
               }}
@@ -74,23 +110,15 @@ export default function AddUser(props) {
                   label="First Name"
                   margin="dense"
                   className={classes.text}
-                  // onChange={handleText}
+                  onChange={handleChangeFirst}
                 />
                 <TextField
                   id="standard-basic"
                   label="Last Name"
                   margin="dense"
                   className={classes.text}
-                  // onChange={handleSub}
+                  onChange={handleChangeLast}
                 />
-                <TextField
-                  id="standard-basic"
-                  label="Email"
-                  margin="dense"
-                  className={classes.text}
-                  // onChange={handleSub}
-                />
-                <br />
                 <FormControl className={classes.formControl}>
                   <InputLabel id="demo-simple-select-label">
                     Role
@@ -98,22 +126,30 @@ export default function AddUser(props) {
                   <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
-                    value={'table'}
-                    // onChange={handleChange}
+                    value={user.role}
+                    onChange={handleChangeRole}
                     label="Role"
                   >
-                    <MenuItem value="LifeStyle">Writer</MenuItem>
-                    <MenuItem value="Sports">Editor</MenuItem>
-                    <MenuItem value="Gospel">Artist</MenuItem>
+                    <MenuItem value="Writer">Writer</MenuItem>
+                    <MenuItem value="Editor">Editor</MenuItem>
+                    <MenuItem value="Artist">Artist</MenuItem>
                   </Select>
                 </FormControl>
+                <TextField
+                  id="standard-basic"
+                  label="Email"
+                  margin="dense"
+                  className={classes.text}
+                  onChange={handleChangeEmail}
+                />
+                <br />
                 </div>
               <Button
                 variant="contained"
                 color="primary"
                 size="small"
                 style={{ marginTop: "20px", fontSize: "12px" }}
-                // onClick={handleNewArticle}
+                onClick={handleSubmit}
               >
                 Create User
               </Button>
