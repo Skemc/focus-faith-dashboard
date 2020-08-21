@@ -25,7 +25,7 @@ export const PrivateRoute = ({ component: Component, ...rest }) => {
           return decodedToken ? (
             <Component {...props} />
           ) : (
-            history.push("/signin")
+            history.push("/auth/signin")
           );
         }}
       />

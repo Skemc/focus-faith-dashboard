@@ -8,6 +8,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
+import EditNews from './EditArticle.jsx';
 import Axios from 'axios';
 
 const columns = [
@@ -60,11 +61,14 @@ const useStyles = makeStyles({
   tableHead: {backgroundColor: 'red'}
 });
 
-export default function NewsTable() {
+export default function NewsTable(props) {
   const classes = useStyles();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [articles, setArticles] = React.useState([]);
+  const [singleArticle, setSingleArticle] = React.useState({});
+  const [openModal, setOpenModal] = React.useState(false);
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -84,9 +88,13 @@ export default function NewsTable() {
     }
     fetchArticles();
   }, []);
+  const sendArticle = () => {
+    console.log('article', article)
+  }
 
   return (
     <Paper className={classes.root}>
+      {console.log('soul', props)}
       <TableContainer className={classes.container}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead className={classes.tableHead}>
@@ -114,6 +122,10 @@ export default function NewsTable() {
                         role="checkbox"
                         tabIndex={-1}
                         key={article.news_id}
+                        onClick={props.role === 'admin' || props.role === 'editor' ? () => { 
+                          setSingleArticle(article)
+                        } : () => console.log('souuu', props.role)}
+                        style={{cursor: props.role === 'writer' ? 'pointer' : ''}}
                       >
                         {columns.map((column) => {
                           const value = article[column.id];
@@ -127,6 +139,7 @@ export default function NewsTable() {
                       </TableRow>
                     );
                   })}
+            <EditNews open={singleArticle.hasOwnProperty('news_id') ? true : false} article={singleArticle} />
           </TableBody>
         </Table>
       </TableContainer>

@@ -14,6 +14,13 @@ import {
   InputLabel,
 } from "@material-ui/core";
 import Axios from 'axios';
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Snackbar from "@material-ui/core/Snackbar";
+import Alert from "@material-ui/lab/Alert";
+import VpnKeyIcon from "@material-ui/icons/VpnKey";
+import Tooltip from "@material-ui/core/Tooltip";
+import IconButton from "@material-ui/core/IconButton";
+
 const useStyles = makeStyles((theme) => ({
   modal: {
     display: "flex",
@@ -43,8 +50,16 @@ export default function AddUser(props) {
     firstName: '',
     lastName: '',
     email: '',
-    role: ''
+    phone: '',
+    role: '',
+    password: ''
   });
+  const [toast, setToast] = React.useState({
+    message: "",
+    open: false,
+    type: "",
+  });
+  const [loading, setLoading] = React.useState(false);
 
   const handleChangeRole = (event) => {
     setUser({...user, role: event.target.value})
@@ -58,6 +73,9 @@ export default function AddUser(props) {
   const handleChangeEmail = (event) => {
     setUser({...user, email: event.target.value})
   };
+  const handleChangePhone = (event) => {
+    setUser({...user, phone: event.target.value})
+  };
   const handleOpen = () => {
     setOpen(true);
   };
@@ -67,15 +85,29 @@ export default function AddUser(props) {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    const results = await Axios.post("http://localhost:3000/api/new-user", {
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: user.role,
-    });
-    console.log("Submittted==================*******", results);
-    // history.push('/');
+    try {
+          event.preventDefault();
+          const results = await Axios.post(
+            "http://localhost:3000/api/new-user",
+            {
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+              phone: user.phone,
+              role: user.role,
+              password: user.password
+            }
+          );
+          setToast({
+            message: "User created",
+            open: true,
+            type: "success",
+          });
+          console.log("Submittted==================*******", results);
+        } catch (error) {
+          if(error.response.status === 409) return setToast({message: error.response.data.message, open: true, type: 'error'})
+          return error.message;
+        }
   };
   return (
     <div>
@@ -84,7 +116,7 @@ export default function AddUser(props) {
         aria-describedby="transition-modal-description"
         className={classes.modal}
         open={props.open}
-        onClose={handleClose}
+        onClose={props.onClose}
         closeAfterTransition
         BackdropComponent={Backdrop}
         BackdropProps={{
@@ -92,7 +124,7 @@ export default function AddUser(props) {
         }}
       >
         <Fade in={props.open}>
-           <Container maxWidth="sm">
+          <Container maxWidth="sm">
             <Grid
               spacing={3}
               style={{
@@ -103,6 +135,18 @@ export default function AddUser(props) {
                 paddingBottom: "20px",
               }}
             >
+              <Snackbar
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                open={toast.open}
+                autoHideDuration={3000}
+                onClose={() =>
+                  setTimeout(() => setToast({ ...toast, open: false }), 3000)
+                }
+              >
+                <Alert variant="filled" severity={toast.type}>
+                  {toast.message}
+                </Alert>
+              </Snackbar>
               <h3>Create a new user</h3>
               <div style={{ marginBottom: "20px" }}>
                 <TextField
@@ -120,9 +164,7 @@ export default function AddUser(props) {
                   onChange={handleChangeLast}
                 />
                 <FormControl className={classes.formControl}>
-                  <InputLabel id="demo-simple-select-label">
-                    Role
-                  </InputLabel>
+                  <InputLabel id="demo-simple-select-label">Role</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
@@ -133,6 +175,7 @@ export default function AddUser(props) {
                     <MenuItem value="Writer">Writer</MenuItem>
                     <MenuItem value="Editor">Editor</MenuItem>
                     <MenuItem value="Artist">Artist</MenuItem>
+                    <MenuItem value="Admin">Admin</MenuItem>
                   </Select>
                 </FormControl>
                 <TextField
@@ -142,8 +185,42 @@ export default function AddUser(props) {
                   className={classes.text}
                   onChange={handleChangeEmail}
                 />
+                <TextField
+                  id="standard-basic"
+                  label="Generate password"
+                  margin="dense"
+                  value={user.password}
+                  className={classes.text}
+                  // onChange={handlePassword}
+                />
+                <Tooltip title="Generate password" arrow>
+                    <VpnKeyIcon
+                    style={{
+                      width: "15px",
+                      position: "absolute",
+                      top: "385px",
+                      left: "620px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      let autoPassword = Math.random()
+                        .toString(36)
+                        .substring(7);
+                      setUser({ ...user, password: autoPassword });
+                      console.log("weeeee", user.password);
+                    }}
+                  />
+                </Tooltip>
+
+                <TextField
+                  id="standard-basic"
+                  label="Phone"
+                  margin="dense"
+                  className={classes.text}
+                  onChange={handleChangePhone}
+                />
                 <br />
-                </div>
+              </div>
               <Button
                 variant="contained"
                 color="primary"

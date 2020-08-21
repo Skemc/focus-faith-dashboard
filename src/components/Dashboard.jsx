@@ -8,6 +8,8 @@ import {
   useHistory,
   useLocation,
 } from "react-router-dom";
+import SignIn from "./Signin.jsx";
+import SignUp from "./Signup.jsx";
 import FloatingActionButtons from "./FloatingButton.jsx";
 import verifyToken from '../helpers/verifyToken';
 import NewsTable from "./NewsComponent.jsx";
@@ -173,8 +175,8 @@ const Dashboard = () => {
             <img src={logo} className={classes.logo} />
           </Toolbar>
         </AppBar>
-        <AddNews open={openNewsModal} />
-        <AddUser open={openUserModal} />
+        <AddNews open={openNewsModal} onClose={() => setOpenNewsModal(false)} />
+        <AddUser open={openUserModal} onClose={() => setOpenUserModal(false)} />
         <Drawer
           variant="permanent"
           className={clsx(classes.drawer, {
@@ -205,7 +207,12 @@ const Dashboard = () => {
           </div>
           <List style={{ height: "698px" }}>
             {[
-              { text: "News", icon: <DescriptionIcon />, path: "/", onClick: () => setPath('/news') },
+              {
+                text: "News",
+                icon: <DescriptionIcon />,
+                path: "/news",
+                onClick: () => setPath("/news"),
+              },
               { text: "TV Shows", icon: <TvIcon />, path: "/" },
               { text: "Music", icon: <AlbumIcon />, path: "/" },
               role === "admin"
@@ -213,7 +220,7 @@ const Dashboard = () => {
                     text: "Users",
                     icon: <PeopleAltRoundedIcon />,
                     path: "/users",
-                    onClick: () => setPath('/users')
+                    onClick: () => setPath("/users"),
                   }
                 : "",
             ].map((item, index) => (
@@ -227,37 +234,41 @@ const Dashboard = () => {
           </List>
           <Divider />
           <List>
-              <Link to="/signin">
-            <ListItem button>
-              <ListItemIcon>
-                <ExitToAppIcon />
-              </ListItemIcon>
+              <ListItem button onClick={() => {
+                localStorage.removeItem('token');
+                history.push('/auth/signin');
+              }}>
+                <ListItemIcon>
+                  <ExitToAppIcon />
+                </ListItemIcon>
                 <ListItemText primary="Sign out" />
-            </ListItem>
-              </Link>
+              </ListItem>
           </List>
         </Drawer>
         <main className={classes.content}>
           <Switch>
-            <Route path="/" exact component={NewsTable} />
+            <Route path="/news" exact render={(props) => <NewsTable {...props} role={role ? role : 'writer'}/>} />
             <Route path="/users" component={UsersTable} />
           </Switch>
-          <FloatingActionButtons onClick={() => {
-            console.log(
-              "history",
-              window.location.pathname,
-              "sleep",
-              path
-            );
-            if (window.location.pathname === "/users") {
-              setOpenNewsModal(false);
-              setOpenUserModal(true);
-              return;
-            }
-            setOpenUserModal(false);
-            setOpenNewsModal(true)
-            console.log('state', openNewsModal, openUserModal);
-          }}/>
+          <FloatingActionButtons
+            onClick={() => {
+              console.log(
+                "history",
+                window.location.pathname === "/",
+                "sleep",
+                path
+              );
+              if (window.location.pathname === "/users") {
+                setOpenNewsModal(false);
+                setOpenUserModal(true);
+                return;
+              }
+              setOpenUserModal(false);
+              setOpenNewsModal(true);
+              console.log("state", openNewsModal, openUserModal);
+            }}
+            style={{ display: window.location.pathname === "/" ? 'none' : '' }}
+          />
         </main>
       </div>
     </Router>

@@ -57,7 +57,8 @@ export default function SignUp() {
     lastName: '',
     email: '',
     password: '',
-    role: ''
+    role: '',
+    phone: ''
   })
 
    const handleSubmit = async (event) => {
@@ -67,11 +68,12 @@ export default function SignUp() {
        lastName: user.lastName,
        email: user.email,
        password: user.password,
-       role: user.role
+       role: user.role,
+       phone: user.phone
      });
      console.log("Submittted==================*******", results);
      const response = await results.json();
-     // history.push('/');
+     history.push('/auth/signin');
    };
 
 
@@ -89,6 +91,9 @@ export default function SignUp() {
    };
    const handleRole = ({ target }) => {
      setUser({ ...user, role: target.value });
+   };
+   const handlePhone = ({ target }) => {
+     setUser({ ...user, phone: target.value });
    };
 
   return (
@@ -160,10 +165,19 @@ export default function SignUp() {
                 fullWidth
                 name="password"
                 label="Role"
-                type="password"
-                id="password"
-                autoComplete="current-password"
+                id="role"
                 onChange={handleRole}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                required
+                fullWidth
+                name="phone"
+                label="Phone number"
+                id="phone"
+                onChange={handlePhone}
               />
             </Grid>
           </Grid>
@@ -179,7 +193,7 @@ export default function SignUp() {
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
-              <Link to="/signin">Already have an account? Sign in</Link>
+              <Link to="/auth/signin">Already have an account? Sign in</Link>
             </Grid>
           </Grid>
         </form>

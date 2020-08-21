@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
   fab: {
     position: 'fixed',
     bottom: '50px',
-    right: '50px'
+    right: '50px',
   },
   extendedIcon: {
     marginRight: theme.spacing(1),
@@ -27,8 +27,14 @@ export default function FloatingActionButtons(props) {
 
   return (
     <div className={classes.root}>
-      <Fab color="primary" aria-label="add" className={classes.fab}>
-        <AddIcon onClick={props.onClick}/>
+      {console.log("weed", window.location.pathname === "/", props)}
+      <Fab
+        color="primary"
+        aria-label="add"
+        className={classes.fab}
+        style={props.style}
+      >
+        <AddIcon onClick={props.onClick} />
       </Fab>
     </div>
   );

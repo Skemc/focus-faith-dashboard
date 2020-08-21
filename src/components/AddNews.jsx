@@ -2,12 +2,15 @@ import React, { useEffect, useRef } from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import verifyToken from "../helpers/verifyToken";
 import JoditEditor from "jodit-react";
-
+import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import TextEditor from './TextEditor.jsx';
 import Modal from '@material-ui/core/Modal';
 import Paper from '@material-ui/core/Paper';
 import { Grid, TextField, Container, Button, Select, MenuItem, FormControl, InputLabel } from '@material-ui/core';
 import Axios from 'axios';
+import Alert from "@material-ui/lab/Alert";
+import Snackbar from "@material-ui/core/Snackbar";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -48,14 +51,15 @@ const AddNews = (props) => {
         lastName: ''
     });
     const [article, setArticle] = React.useState({
-        title: '',
-        subtitle: '',
-        body: '',
-        author: '',
-        category: '',
-        image: ''
+        title: null,
+        subtitle: null,
+        body: null,
+        author: null,
+        category: null,
+        image: null
     });
-
+    const [toast, setToast] = React.useState({message: '', open: false, type: ''})
+    const [loading, setLoading] = React.useState(false)
     useEffect(() => {
         const token = localStorage.getItem("token");
         const { payload } = verifyToken(token);
@@ -68,37 +72,42 @@ const AddNews = (props) => {
     };
 
     const handleNewArticle = async () => {
-        const results = await Axios.post(
-          "http://localhost:3000/api/new-article",
-          {
-            title: article.title,
-            subtitle: article.subtitle,
-            body: content,
-            author: `${user.firstName} ${user.lastName}`,
-            category: article.category,
-            image: article.image
-          }
-        );
-        const response = await results.json();
-
+        try {
+          const results = await Axios.post(
+            "http://localhost:3000/api/new-article",
+            {
+              title: article.title,
+              subtitle: article.subtitle,
+              body: content,
+              author: `${user.firstName} ${user.lastName}`,
+              category: article.category,
+              image: article.image,
+            }
+          );
+          setToast({message: 'Article submitted successfully to the editor!', open: true, type: 'success'});
+        } catch (error) {
+          setToast({message: error.message, open: true, type: 'error'})
+        }
     };
 
     const handleImageUpload = async () => {
+      setLoading(true);
         const { files } = document.querySelector('input[type="file"]')
         const formData = new FormData();
         formData.append('file', files[0]);
         // replace this with your upload preset name
         formData.append('upload_preset', 'focus_faith');
         const options = {
-            method: 'POST',
-            body: formData,
+          method: 'POST',
+          body: formData,
         };
-
+        
         // replace cloudname with your Cloudinary cloud_name
         const results = await fetch('https://api.Cloudinary.com/v1_1/focus-faith-family/image/upload', options);
         const response = await results.json();
+        setLoading(false);
         console.log('uploaded!!!');
-        return setArticle({...article, image: response.secure_url});
+        setArticle({...article, image: response.secure_url});
     }
 
     const handleBody = (event) => {
@@ -120,7 +129,7 @@ const AddNews = (props) => {
       <div>
         <Modal
           open={props.open}
-          onClose={() => !props.open}
+          onClose={props.onClose}
           aria-labelledby="simple-modal-title"
           aria-describedby="simple-modal-description"
           style={{ position: "absolute", top: "50px", border: "none" }}
@@ -136,6 +145,16 @@ const AddNews = (props) => {
                 paddingBottom: "20px",
               }}
             >
+              <Snackbar
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                open={toast.open}
+                autoHideDuration={3000}
+                onClose={() =>
+                  setTimeout(() => setToast({ ...toast, open: false }), 3000)
+                }
+              >
+                <Alert variant= "filled" severity={toast.type}>{toast.message}</Alert>
+              </Snackbar>
               <h3>Post a new article</h3>
               <div style={{ marginBottom: "20px" }}>
                 <TextField
@@ -144,6 +163,7 @@ const AddNews = (props) => {
                   margin="dense"
                   className={classes.text}
                   onChange={handleText}
+                  required
                 />
                 <TextField
                   id="standard-basic"
@@ -151,6 +171,7 @@ const AddNews = (props) => {
                   margin="dense"
                   className={classes.text}
                   onChange={handleSub}
+                  required
                 />
                 <br />
                 <FormControl className={classes.formControl}>
@@ -177,6 +198,7 @@ const AddNews = (props) => {
                     marginLeft: "80px",
                     marginRight: "-1px",
                   }}
+                  required
                 />
                 <Button
                   variant="contained"
@@ -185,7 +207,12 @@ const AddNews = (props) => {
                   style={{ marginTop: "2px", fontSize: "8px" }}
                   onClick={handleImageUpload}
                 >
-                  Upload
+                  <CircularProgress
+                    size={15}
+                    color="secondary"
+                    style={{ display: loading ? "" : "none" }}
+                  />
+                  {loading ? "" : !article.image ? "Upload" : "Image uploaded"}
                 </Button>
               </div>
               <JoditEditor
@@ -193,7 +220,10 @@ const AddNews = (props) => {
                 value={content}
                 config={config}
                 tabIndex={1} // tabIndex of textarea
-                onBlur={(newContent) => {setContent(newContent.target.textContent); console.log('whhhhhat',content);}} // preferred to use only this option to update the content for performance reasons
+                onBlur={(newContent) => {
+                  setContent(newContent.target.textContent);
+                  console.log("whhhhhat", content);
+                }} // preferred to use only this option to update the content for performance reasons
                 // onChange={handleBody}
               />
               <Button
