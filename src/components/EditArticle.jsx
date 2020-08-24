@@ -62,9 +62,11 @@ const EditNews = (props) => {
   const [article, setArticle] = React.useState({
     title: null,
     subtitle: null,
+    body: null,
     author: null,
     category: null,
     image: null,
+    bodyHtml: null,
   });
   const [foundArticle, setFoundArticleId] = React.useState(props.article)
   const [toast, setToast] = React.useState({
@@ -97,17 +99,23 @@ const EditNews = (props) => {
   const handleEditArticle = async () => {
     try {
       const token = localStorage.getItem('token');
-      console.log('usss');
       const results = await Axios.patch(
         `http://localhost:3000/api/edit-article/${props.article.news_id}`,
         {
           title: article.title ? article.title : props.article.title,
-          subtitle: article.subtitle ? article.subtitle : props.article.subtitle,
+          subtitle: article.subtitle
+            ? article.subtitle
+            : props.article.subtitle,
           body: content ? content : props.article.body,
-          category: article.category ? article.category : props.article.category,
-        }, 
+          category: article.category
+            ? article.category
+            : props.article.category,
+          bodyhtml: article.bodyHtml
+            ? article.bodyHtml
+            : props.article.bodyhtml,
+        },
         {
-          headers: {'auth': `${token}`}
+          headers: { auth: `${token}` },
         }
       );
       setToast({
@@ -144,8 +152,8 @@ const EditNews = (props) => {
   };
 
   const handleBody = (event) => {
-    setContent(event);
-    console.log("runnnnnn", content);
+    setArticle({ ...article, bodyHtml: event });
+    console.log("runnnnnn", event.toString("html"));
   };
   const handleText = (event) => {
     setArticle({ ...article, title: event.target.value });
@@ -157,7 +165,7 @@ const EditNews = (props) => {
 
   return (
     <div>
-      {console.log("heeeeeeeeeeeeeeee", props.article.category)}
+      {console.log("heeeeeeeeeeeeeeee", props.article)}
       <Modal
         open={props.open}
         onClose={props.onClose}
@@ -234,14 +242,14 @@ const EditNews = (props) => {
             </div>
             <JoditEditor
               ref={editor}
-              value={props.article.body}
+              value={props.article.bodyhtml}
               config={config}
               tabIndex={1} // tabIndex of textarea
               onBlur={(newContent) => {
                 setContent(newContent.target.textContent);
                 console.log("whhhhhat", content);
               }} // preferred to use only this option to update the content for performance reasons
-              // onChange={handleBody}
+              onChange={handleBody}
             />
             <Button
               variant="contained"

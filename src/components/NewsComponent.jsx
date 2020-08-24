@@ -9,7 +9,9 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import EditNews from './EditArticle.jsx';
+import CategoriesComponent from './CategoriesComponent.jsx';
 import Axios from 'axios';
+import { Grid } from '@material-ui/core';
 
 const columns = [
   { id: 'title', label: 'Title', minWidth: 100 },
@@ -55,7 +57,7 @@ const useStyles = makeStyles({
     width: '100%',
   },
   container: {
-    marginTop: '100px',
+    marginTop: '50px',
     maxHeight: 540,
   },
   tableHead: {backgroundColor: 'red'}
@@ -66,6 +68,7 @@ export default function NewsTable(props) {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [articles, setArticles] = React.useState([]);
+  const [categories, setCategories] = React.useState([]);
   const [singleArticle, setSingleArticle] = React.useState({});
   const [openModal, setOpenModal] = React.useState(false);
 
@@ -81,9 +84,11 @@ export default function NewsTable(props) {
   
   useEffect(() => {
     const fetchArticles = async () => {
+      const categories = await Axios.get('http://localhost:3000/api/categories');
       const response = await Axios.get('http://localhost:3000/api/news');
       // console.log('savagelove+++++++++++++++++++++++++++')
       // console.log('-------------->', response.data.data);
+      setCategories(categories.data.data)
       setArticles(response.data.data);
     }
     fetchArticles();
@@ -93,65 +98,80 @@ export default function NewsTable(props) {
   }
 
   return (
-    <Paper className={classes.root}>
-      {console.log('soul', props)}
-      <TableContainer className={classes.container}>
-        <Table stickyHeader aria-label="sticky table">
-          <TableHead className={classes.tableHead}>
-            <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {articles.length === 0
-              ? "No articles yet"
-              : articles
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((article) => {
-                    return (
-                      <TableRow
-                        hover
-                        role="checkbox"
-                        tabIndex={-1}
-                        key={article.news_id}
-                        onClick={props.role === 'admin' || props.role === 'editor' ? () => { 
-                          setSingleArticle(article)
-                        } : () => console.log('souuu', props.role)}
-                        style={{cursor: props.role === 'writer' ? 'pointer' : ''}}
-                      >
-                        {columns.map((column) => {
-                          const value = article[column.id];
-
-                          return (
-                            <TableCell key={column.id} align={column.align}>
-                              {value}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    );
-                  })}
-            <EditNews open={singleArticle.hasOwnProperty('news_id') ? true : false} article={singleArticle} />
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25, 100]}
-        component="div"
-        count={articles.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onChangePage={handleChangePage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
-      />
-    </Paper>
+    <>
+      <CategoriesComponent/>
+      <Paper className={classes.root}>
+        {console.log("soul", props)}
+        <TableContainer className={classes.container}>
+          <Table stickyHeader aria-label="sticky table">
+            <TableHead className={classes.tableHead}>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.id}
+                    align={column.align}
+                    style={{ minWidth: column.minWidth }}
+                  >
+                    {column.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {articles.length === 0
+                ? "No articles yet"
+                : articles
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((article) => {
+                      return (
+                        <TableRow
+                          hover
+                          role="checkbox"
+                          tabIndex={-1}
+                          key={article.news_id}
+                          onClick={
+                            props.role === "admin" || props.role === "editor"
+                              ? () => {
+                                  setSingleArticle(article);
+                                }
+                              : () => console.log("souuu", props.role)
+                          }
+                          style={{
+                            cursor: props.role === "writer" ? "pointer" : "",
+                          }}
+                        >
+                          {columns.map((column) => {
+                            let value = article[column.id];
+                            if (article["body"])
+                              value = `${value.slice(0, 80)}...`;
+                            return (
+                              <TableCell key={column.id} align={column.align}>
+                                {value === article.body
+                                  ? `${value.slice(0, 80)}...`
+                                  : value}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      );
+                    })}
+              <EditNews
+                open={singleArticle.hasOwnProperty("news_id") ? true : false}
+                article={singleArticle}
+              />
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25, 100]}
+          component="div"
+          count={articles.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+        />
+      </Paper>
+    </>
   );
 }

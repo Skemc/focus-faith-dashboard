@@ -103,6 +103,7 @@ const useStyles = makeStyles((theme) => ({
   content: {
     flexGrow: 1,
     padding: theme.spacing(3),
+    backgroundColor: "#F9FBFF",
   },
   logo: {
     width: "150px",

@@ -41,8 +41,15 @@ const AddNews = (props) => {
     const [content, setContent] = React.useState("");
 
     const config = {
-    readonly: false, // all options from https://xdsoft.net/jodit/doc/
-    };
+      // all options from https://xdsoft.net/jodit/doc/
+      askBeforePasteHTML: false,
+        askBeforePasteFromWord: true, //couse styling issues when pasting from word
+        events: {
+          afterOpenPasteDialog: (dialog, msg, title, callback) => {
+            dialog.close()
+            callback()
+          },
+    }};
     const [open, setOpen] = React.useState(false);
     const [image, setImage] = React.useState('');
     const [category, setCategory] = React.useState('');
@@ -56,7 +63,8 @@ const AddNews = (props) => {
         body: null,
         author: null,
         category: null,
-        image: null
+        image: null,
+        bodyHtml: null
     });
     const [toast, setToast] = React.useState({message: '', open: false, type: ''})
     const [loading, setLoading] = React.useState(false)
@@ -82,6 +90,7 @@ const AddNews = (props) => {
               author: `${user.firstName} ${user.lastName}`,
               category: article.category,
               image: article.image,
+              bodyhtml: article.bodyHtml
             }
           );
           setToast({message: 'Article submitted successfully to the editor!', open: true, type: 'success'});
@@ -111,8 +120,8 @@ const AddNews = (props) => {
     }
 
     const handleBody = (event) => {
-        setContent(event);
-        console.log('runnnnnn', content);
+        setArticle({...article, bodyHtml: event});
+        console.log('runnnnnn', event.toString('html'));
     };
     const handleText = (event) => {
         setArticle({...article,
@@ -217,14 +226,13 @@ const AddNews = (props) => {
               </div>
               <JoditEditor
                 ref={editor}
-                value={content}
+                value={article.bodyHtml}
                 config={config}
                 tabIndex={1} // tabIndex of textarea
                 onBlur={(newContent) => {
                   setContent(newContent.target.textContent);
-                  console.log("whhhhhat", content);
                 }} // preferred to use only this option to update the content for performance reasons
-                // onChange={handleBody}
+                onChange={handleBody}
               />
               <Button
                 variant="contained"
