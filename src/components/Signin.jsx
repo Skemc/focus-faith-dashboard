@@ -14,7 +14,8 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import Axios from "axios";
-
+import Alert from "@material-ui/lab/Alert";
+import Snackbar from "@material-ui/core/Snackbar";
 
 function Copyright() {
   return (
@@ -55,23 +56,35 @@ const SignIn = () => {
     email: '',
     password: ''
   });
+    const [toast, setToast] = React.useState({
+      message: "",
+      open: false,
+      type: "",
+    });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const history = createBrowserHistory({
-      forceRefresh: true,
-    });
-    const results = await Axios.post(
-          "http://localhost:3000/api/signin",
-          {
-            email: user.email,
-            password: user.password
-          }
-        );
-        console.log('Submittted==================*******', results);
-        localStorage.setItem('token', results.data.data);
-        history.push('/');
-        // const response = await results.json();
+    try {
+      const history = createBrowserHistory({
+        forceRefresh: true,
+      });
+      const results = await Axios.post("http://localhost:3000/api/signin", {
+        email: user.email,
+        password: user.password,
+      });
+      localStorage.setItem("token", results.data.data);
+      history.push("/");
+    } catch (error) {
+      console.log('error', error.response.data);
+      if(error.response.data.status == 401) {
+        setToast({ message: error.response.data.message, open: true, type: "error" });
+      }
+      setToast({
+        message: error.response.data.message,
+        open: true,
+        type: "error",
+      });
+    }
   }
 
   const handleEmail = ({target}) => {
@@ -84,6 +97,18 @@ const SignIn = () => {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={toast.open}
+        autoHideDuration={3000}
+        onClose={() =>
+          setTimeout(() => setToast({ ...toast, open: false }), 3000)
+        }
+      >
+        <Alert variant="filled" severity={toast.type}>
+          {toast.message}
+        </Alert>
+      </Snackbar>
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />
@@ -120,15 +145,15 @@ const SignIn = () => {
             control={<Checkbox value="remember" color="primary" />}
             label="Remember me"
           />
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-              onClick={handleSubmit}
-            >
-              Sign In
-            </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+            onClick={handleSubmit}
+          >
+            Sign In
+          </Button>
           <Grid container>
             <Grid item xs>
               <Link href="#" variant="body2">
@@ -136,9 +161,7 @@ const SignIn = () => {
               </Link>
             </Grid>
             <Grid item>
-              <Link to="/auth/signup">
-                {"Don't have an account? Sign Up"}
-              </Link>
+              <Link to="/auth/signup">{"Don't have an account? Sign Up"}</Link>
             </Grid>
           </Grid>
         </form>

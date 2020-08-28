@@ -11,7 +11,6 @@ import Axios from 'axios';
 import Alert from "@material-ui/lab/Alert";
 import Snackbar from "@material-ui/core/Snackbar";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import Editor from "./Editor.jsx";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -139,7 +138,6 @@ const AddNews = (props) => {
 
     return (
       <div>
-        {console.log("ffff", article)}
         <Modal
           open={props.open}
           onClose={props.onClose}
@@ -207,9 +205,7 @@ const AddNews = (props) => {
                             {category.category_name}
                           </MenuItem>
                         );
-                        // <MenuItem value="LifeStyle">LifeStyle</MenuItem>
                       })}
-                    {/* <MenuItem value="Gospel">Gospel</MenuItem> */}
                   </Select>
                 </FormControl>
                 <input
@@ -247,7 +243,6 @@ const AddNews = (props) => {
                   setArticle({ ...article, bodyHtml: newContent.target.innerHTML });
                   
                 }} // preferred to use only this option to update the content for performance reasons
-                // onChange={handleBody}
               />
               <Button
                 variant="contained"
