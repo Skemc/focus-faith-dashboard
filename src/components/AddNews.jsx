@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import verifyToken from "../helpers/verifyToken";
 import JoditEditor from "jodit-react";
@@ -11,6 +11,7 @@ import Axios from 'axios';
 import Alert from "@material-ui/lab/Alert";
 import Snackbar from "@material-ui/core/Snackbar";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Editor from "./Editor.jsx";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -43,13 +44,14 @@ const AddNews = (props) => {
     const config = {
       // all options from https://xdsoft.net/jodit/doc/
       askBeforePasteHTML: false,
-        askBeforePasteFromWord: true, //couse styling issues when pasting from word
-        events: {
-          afterOpenPasteDialog: (dialog, msg, title, callback) => {
-            dialog.close()
-            callback()
-          },
-    }};
+      askBeforePasteFromWord: true, //couse styling issues when pasting from word
+      events: {
+        afterOpenPasteDialog: (dialog, msg, title, callback) => {
+          dialog.close();
+          callback();
+        },
+      },
+    };
     const [open, setOpen] = React.useState(false);
     const [image, setImage] = React.useState('');
     const [category, setCategory] = React.useState('');
@@ -76,7 +78,7 @@ const AddNews = (props) => {
 
     const handleChange = (event) => {
         setArticle({...article, category: event.target.value});
-        console.log('awkward', article, article.image);
+        
     };
 
     const handleNewArticle = async () => {
@@ -94,6 +96,7 @@ const AddNews = (props) => {
             }
           );
           setToast({message: 'Article submitted successfully to the editor!', open: true, type: 'success'});
+          window.location.reload();
         } catch (error) {
           setToast({message: error.message, open: true, type: 'error'})
         }
@@ -120,8 +123,8 @@ const AddNews = (props) => {
     }
 
     const handleBody = (event) => {
+      console.log('eeent', event);
         setArticle({...article, bodyHtml: event});
-        console.log('runnnnnn', event.toString('html'));
     };
     const handleText = (event) => {
         setArticle({...article,
@@ -136,6 +139,7 @@ const AddNews = (props) => {
 
     return (
       <div>
+        {console.log("ffff", article)}
         <Modal
           open={props.open}
           onClose={props.onClose}
@@ -162,7 +166,9 @@ const AddNews = (props) => {
                   setTimeout(() => setToast({ ...toast, open: false }), 3000)
                 }
               >
-                <Alert variant= "filled" severity={toast.type}>{toast.message}</Alert>
+                <Alert variant="filled" severity={toast.type}>
+                  {toast.message}
+                </Alert>
               </Snackbar>
               <h3>Post a new article</h3>
               <div style={{ marginBottom: "20px" }}>
@@ -190,13 +196,20 @@ const AddNews = (props) => {
                   <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
-                    value={article.category}
+                    value={article.category ? article.category : ""}
                     onChange={handleChange}
                     label="Category"
                   >
-                    <MenuItem value="LifeStyle">LifeStyle</MenuItem>
-                    <MenuItem value="Sports">Sports</MenuItem>
-                    <MenuItem value="Gospel">Gospel</MenuItem>
+                    {props.categories &&
+                      props.categories.map((category) => {
+                        return (
+                          <MenuItem value={`${category.category_name}`}>
+                            {category.category_name}
+                          </MenuItem>
+                        );
+                        // <MenuItem value="LifeStyle">LifeStyle</MenuItem>
+                      })}
+                    {/* <MenuItem value="Gospel">Gospel</MenuItem> */}
                   </Select>
                 </FormControl>
                 <input
@@ -231,8 +244,10 @@ const AddNews = (props) => {
                 tabIndex={1} // tabIndex of textarea
                 onBlur={(newContent) => {
                   setContent(newContent.target.textContent);
+                  setArticle({ ...article, bodyHtml: newContent.target.innerHTML });
+                  
                 }} // preferred to use only this option to update the content for performance reasons
-                onChange={handleBody}
+                // onChange={handleBody}
               />
               <Button
                 variant="contained"

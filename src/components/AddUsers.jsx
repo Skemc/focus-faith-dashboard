@@ -103,6 +103,8 @@ export default function AddUser(props) {
             open: true,
             type: "success",
           });
+          window.location.reload();
+
           console.log("Submittted==================*******", results);
         } catch (error) {
           if(error.response.status === 409) return setToast({message: error.response.data.message, open: true, type: 'error'})
@@ -172,10 +174,10 @@ export default function AddUser(props) {
                     onChange={handleChangeRole}
                     label="Role"
                   >
-                    <MenuItem value="Writer">Writer</MenuItem>
-                    <MenuItem value="Editor">Editor</MenuItem>
-                    <MenuItem value="Artist">Artist</MenuItem>
-                    <MenuItem value="Admin">Admin</MenuItem>
+                    <MenuItem value="writer">writer</MenuItem>
+                    <MenuItem value="editor">editor</MenuItem>
+                    <MenuItem value="artist">artist</MenuItem>
+                    <MenuItem value="admin">admin</MenuItem>
                   </Select>
                 </FormControl>
                 <TextField

@@ -41,6 +41,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import UsersTable from "./Users.jsx";
+import Axios from 'axios';
 
 const drawerWidth = 240;
 
@@ -103,7 +104,6 @@ const useStyles = makeStyles((theme) => ({
   content: {
     flexGrow: 1,
     padding: theme.spacing(3),
-    backgroundColor: "#F9FBFF",
   },
   logo: {
     width: "150px",
@@ -131,6 +131,7 @@ const Dashboard = () => {
         firstName: '',
         lastName: ''
     });
+      const [categories, setCategories] = React.useState([]);
   const [role, setRole] = React.useState('');
   const [path, setPath] = React.useState('')
   useEffect(() => {
@@ -138,6 +139,15 @@ const Dashboard = () => {
     const {payload} = verifyToken(token)
     setUser({ firstName: payload.firstname, lastName: payload.lastname });
     setRole(payload.role);
+    const fetchArticles = async () => {
+      const categories = await Axios.get(
+        "http://localhost:3000/api/categories"
+      );
+      // console.log('savagelove+++++++++++++++++++++++++++')
+      // console.log('-------------->', response.data.data);
+      setCategories(categories.data.data);
+    };
+        fetchArticles();
   }, []);
 
   const handleDrawerOpen = () => {
@@ -176,8 +186,15 @@ const Dashboard = () => {
             <img src={logo} className={classes.logo} />
           </Toolbar>
         </AppBar>
-        <AddNews open={openNewsModal} onClose={() => setOpenNewsModal(false)} />
-        <AddUser open={openUserModal} onClose={() => setOpenUserModal(false)} />
+        <AddNews
+          open={openNewsModal}
+          categories={categories}
+          onClose={() => setOpenNewsModal(false)}
+        />
+        <AddUser
+          open={openUserModal}
+          onClose={() => setOpenUserModal(false)}
+        />
         <Drawer
           variant="permanent"
           className={clsx(classes.drawer, {
@@ -235,20 +252,29 @@ const Dashboard = () => {
           </List>
           <Divider />
           <List>
-              <ListItem button onClick={() => {
-                localStorage.removeItem('token');
-                history.push('/auth/signin');
-              }}>
-                <ListItemIcon>
-                  <ExitToAppIcon />
-                </ListItemIcon>
-                <ListItemText primary="Sign out" />
-              </ListItem>
+            <ListItem
+              button
+              onClick={() => {
+                localStorage.removeItem("token");
+                history.push("/auth/signin");
+              }}
+            >
+              <ListItemIcon>
+                <ExitToAppIcon />
+              </ListItemIcon>
+              <ListItemText primary="Sign out" />
+            </ListItem>
           </List>
         </Drawer>
         <main className={classes.content}>
           <Switch>
-            <Route path="/news" exact render={(props) => <NewsTable {...props} role={role ? role : 'writer'}/>} />
+            <Route
+              path="/news"
+              exact
+              render={(props) => (
+                <NewsTable {...props} role={role ? role : "writer"} />
+              )}
+            />
             <Route path="/users" component={UsersTable} />
           </Switch>
           <FloatingActionButtons
@@ -268,7 +294,7 @@ const Dashboard = () => {
               setOpenNewsModal(true);
               console.log("state", openNewsModal, openUserModal);
             }}
-            style={{ display: window.location.pathname === "/" ? 'none' : '' }}
+            style={{ display: window.location.pathname === "/" ? "none" : "" }}
           />
         </main>
       </div>

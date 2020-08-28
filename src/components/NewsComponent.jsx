@@ -69,6 +69,7 @@ export default function NewsTable(props) {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [articles, setArticles] = React.useState([]);
   const [categories, setCategories] = React.useState([]);
+  const [categoriesGroup, setCategoriesGroup] = React.useState([]);
   const [singleArticle, setSingleArticle] = React.useState({});
   const [openModal, setOpenModal] = React.useState(false);
 
@@ -85,10 +86,12 @@ export default function NewsTable(props) {
   useEffect(() => {
     const fetchArticles = async () => {
       const categories = await Axios.get('http://localhost:3000/api/categories');
+      const categorieGroup = await Axios.get('http://localhost:3000/api/group-categories');
       const response = await Axios.get('http://localhost:3000/api/news');
       // console.log('savagelove+++++++++++++++++++++++++++')
       // console.log('-------------->', response.data.data);
-      setCategories(categories.data.data)
+      setCategories(categories.data.data);
+      setCategoriesGroup(categorieGroup.data.data);
       setArticles(response.data.data);
     }
     fetchArticles();
@@ -99,7 +102,10 @@ export default function NewsTable(props) {
 
   return (
     <>
-      <CategoriesComponent/>
+      <CategoriesComponent
+        categories={categories}
+        categoriesGroup={categoriesGroup}
+      />
       <Paper className={classes.root}>
         {console.log("soul", props)}
         <TableContainer className={classes.container}>
@@ -137,17 +143,17 @@ export default function NewsTable(props) {
                               : () => console.log("souuu", props.role)
                           }
                           style={{
-                            cursor: props.role === "writer" ? "pointer" : "",
+                            cursor: props.role !== "admin" && props.role !== 'editor' ? "" : "pointer",
                           }}
                         >
                           {columns.map((column) => {
                             let value = article[column.id];
-                            if (article["body"])
-                              value = `${value.slice(0, 80)}...`;
+                            // if (article["body"])
+                            //   value = `${value.slice(0, 80)}...`;
                             return (
                               <TableCell key={column.id} align={column.align}>
                                 {value === article.body
-                                  ? `${value.slice(0, 80)}...`
+                                  ? `${value.slice(0, 50)}...`
                                   : value}
                               </TableCell>
                             );
@@ -158,6 +164,7 @@ export default function NewsTable(props) {
               <EditNews
                 open={singleArticle.hasOwnProperty("news_id") ? true : false}
                 article={singleArticle}
+                categories={categories}
               />
             </TableBody>
           </Table>

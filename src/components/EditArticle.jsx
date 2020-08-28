@@ -123,6 +123,8 @@ const EditNews = (props) => {
         open: true,
         type: "success",
       });
+      window.location.reload();
+
     } catch (error) {
       setToast({ message: error.message, open: true, type: "error" });
     }
@@ -222,20 +224,30 @@ const EditNews = (props) => {
                 <Select
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
-                  value={!article.category ? props.article.category : article.category}
+                  value={
+                    !article.category
+                      ? props.article.category
+                      : article.category
+                  }
                   onChange={handleChange}
                   label="Category"
                 >
-                  <MenuItem value="LifeStyle">LifeStyle</MenuItem>
-                  <MenuItem value="Sports">Sports</MenuItem>
-                  <MenuItem value="Gospel">Gospel</MenuItem>
+                  {props.categories &&
+                    props.categories.map((category) => {
+                      return (
+                        <MenuItem value={`${category.category_name}`}>
+                          {category.category_name}
+                        </MenuItem>
+                      );
+                      // <MenuItem value="LifeStyle">LifeStyle</MenuItem>
+                    })}
                 </Select>
               </FormControl>
               <TextField
                 id="standard-basic"
                 label="Author"
                 margin="dense"
-                style={{marginLeft: '5px'}}
+                style={{ marginLeft: "5px" }}
                 defaultValue={props.article.author}
                 disabled
               />
