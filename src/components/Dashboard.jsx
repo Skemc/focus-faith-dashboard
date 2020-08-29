@@ -42,6 +42,10 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import UsersTable from "./Users.jsx";
 import Axios from 'axios';
+import TvComponent from './TVshows/TvCompoonent.jsx';
+import AddTvShow from "./TVshows/AddTvShow.jsx";
+import TuneIcon from "@material-ui/icons/Tune";
+import Settings from "./User/Settings.jsx";
 
 const drawerWidth = 240;
 
@@ -127,17 +131,15 @@ const Dashboard = () => {
   const [open, setOpen] = React.useState(false);
   const [openNewsModal, setOpenNewsModal] = React.useState(false);
   const [openUserModal, setOpenUserModal] = React.useState(false);
-   const [user, setUser] = React.useState({
-        firstName: '',
-        lastName: ''
-    });
+  const [openTVModal, setOpenTVModal] = React.useState(false);
+   const [user, setUser] = React.useState({});
       const [categories, setCategories] = React.useState([]);
   const [role, setRole] = React.useState('');
   const [path, setPath] = React.useState('')
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const {payload} = verifyToken(token)
-    setUser({ firstName: payload.firstname, lastName: payload.lastname });
+    const {payload} = verifyToken(token);
+    setUser(payload);
     setRole(payload.role);
     const fetchArticles = async () => {
       const categories = await Axios.get(
@@ -191,10 +193,8 @@ const Dashboard = () => {
           categories={categories}
           onClose={() => setOpenNewsModal(false)}
         />
-        <AddUser
-          open={openUserModal}
-          onClose={() => setOpenUserModal(false)}
-        />
+        <AddUser open={openUserModal} onClose={() => setOpenUserModal(false)} />
+        <AddTvShow open={openTVModal} />
         <Drawer
           variant="permanent"
           className={clsx(classes.drawer, {
@@ -209,10 +209,11 @@ const Dashboard = () => {
           }}
         >
           <div>
+
             <PersonIcon className={classes.avatar} />
             <span
               className={classes.avatarName}
-            >{`${user.firstName} ${user.lastName}`}</span>
+            >{`${user.firstname} ${user.lastname}`}</span>
           </div>
           <div className={classes.toolbar}>
             <IconButton onClick={handleDrawerClose}>
@@ -231,7 +232,7 @@ const Dashboard = () => {
                 path: "/news",
                 onClick: () => setPath("/news"),
               },
-              { text: "TV Shows", icon: <TvIcon />, path: "/" },
+              { text: "TV Shows", icon: <TvIcon />, path: "/tv-shows" },
               { text: "Music", icon: <AlbumIcon />, path: "/" },
               role === "admin"
                 ? {
@@ -252,6 +253,20 @@ const Dashboard = () => {
           </List>
           <Divider />
           <List>
+            <Link to="/settings">
+              <ListItem
+                button
+                // onClick={() => {
+                //   localStorage.removeItem("token");
+                //   history.push("/auth/signin");
+                // }}
+              >
+                <ListItemIcon>
+                  <TuneIcon />
+                </ListItemIcon>
+                <ListItemText primary="Settings" />
+              </ListItem>
+            </Link>
             <ListItem
               button
               onClick={() => {
@@ -270,27 +285,31 @@ const Dashboard = () => {
           <Switch>
             <Route
               path="/news"
-              exact
+              
               render={(props) => (
                 <NewsTable {...props} role={role ? role : "writer"} />
               )}
             />
+            <Route path="/tv-shows" component={TvComponent} />
             <Route path="/users" component={UsersTable} />
+            <Route path="/settings" render={(props) => (<Settings {...props} user={user}/>)} />
           </Switch>
           <FloatingActionButtons
             onClick={() => {
-              console.log(
-                "history",
-                window.location.pathname === "/",
-                "sleep",
-                path
-              );
               if (window.location.pathname === "/users") {
                 setOpenNewsModal(false);
+                setOpenTvModal(false);
                 setOpenUserModal(true);
                 return;
               }
+              if (window.location.pathname === "/tv-shows") {
+                setOpenNewsModal(false);
+                setOpenUserModal(false);
+                setOpenTVModal(true);
+                return;
+              }
               setOpenUserModal(false);
+              setOpenTVModal(false);
               setOpenNewsModal(true);
               console.log("state", openNewsModal, openUserModal);
             }}

@@ -143,8 +143,12 @@ import Tooltip from "@material-ui/core/Tooltip";
           container
           style={{ marginTop: "90px" }}
           // direction='row'
-          justify={props.categories.length < 0 ? "center" : "flex-start"}
-          spacing={3}
+          justify={
+            props.categories.length <= 0 || props.categories.length
+             >= 5  ? "center"
+              : "flex-start"
+          }
+          spacing={2}
         >
           {props.categories &&
             props.categories.map((category, index) => {
@@ -185,7 +189,9 @@ import Tooltip from "@material-ui/core/Tooltip";
                         }}
                       >
                         {/* 4 {console.log("what", props.categoriesGroup[index])} */}
-                        {props.categoriesGroup[index] ? props.categoriesGroup[index].count : 0}
+                        {props.categoriesGroup[index]
+                          ? props.categoriesGroup[index].count
+                          : 0}
                       </span>
                       <span style={{ textAlign: "center" }}>articles</span>
                     </Grid>
@@ -193,21 +199,21 @@ import Tooltip from "@material-ui/core/Tooltip";
                 </Grid>
               );
             })}
-            <Grid item>
-              <Grid
-                container
-                style={{
-                  width: "30px",
-                  // backgroundColor: "white",
-                  paddingTop: "50px",
-                  // boxShadow: "0px 6px 6px rgba(0, 0, 0, 0.05) ",
-                  // borderRadius: "7px",
-                  cursor: "pointer",
-                }}
-                justify="center"
-                alignItem="center"
-                spacing={2}
-              >
+          <Grid item>
+            <Grid
+              container
+              style={{
+                width: "30px",
+                // backgroundColor: "white",
+                paddingTop: "50px",
+                // boxShadow: "0px 6px 6px rgba(0, 0, 0, 0.05) ",
+                // borderRadius: "7px",
+                cursor: "pointer",
+              }}
+              justify="center"
+              alignItem="center"
+            >
+              <Grid>
                 <Tooltip title="Add new category" arrow>
                   <AddCircleOutlineRoundedIcon
                     fontSize="large"
@@ -217,6 +223,7 @@ import Tooltip from "@material-ui/core/Tooltip";
                 </Tooltip>
               </Grid>
             </Grid>
+          </Grid>
         </Grid>
       </>
     );
