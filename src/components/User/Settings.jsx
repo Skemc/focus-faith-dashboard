@@ -261,7 +261,7 @@ const Settings = (props) => {
             </Grid>
           </Grid>
           <Grid>
-            <h2>User details</h2>
+            <h2>User settings</h2>
             <Grid>
               <TextField
                 id="standard-basic"

@@ -165,6 +165,7 @@ const Dashboard = () => {
 
   return (
     <Router>
+      {console.log("what", window.location.pathname === "/")}
       <div className={classes.root}>
         <CssBaseline />
         <AppBar
@@ -209,7 +210,6 @@ const Dashboard = () => {
           }}
         >
           <div>
-
             <PersonIcon className={classes.avatar} />
             <span
               className={classes.avatarName}
@@ -243,7 +243,10 @@ const Dashboard = () => {
                   }
                 : "",
             ].map((item, index) => (
-              <Link to={item.path}>
+              <Link
+                style={{ textDecoration: "none", color: "black" }}
+                to={item.path}
+              >
                 <ListItem button key={item.text} onClick={item.onClick}>
                   <ListItemIcon>{item.icon}</ListItemIcon>
                   <ListItemText primary={item.text} />
@@ -253,7 +256,10 @@ const Dashboard = () => {
           </List>
           <Divider />
           <List>
-            <Link to="/settings">
+            <Link
+              style={{ textDecoration: "none", color: "black" }}
+               to="/settings"
+            >
               <ListItem
                 button
                 // onClick={() => {
@@ -285,20 +291,22 @@ const Dashboard = () => {
           <Switch>
             <Route
               path="/news"
-              
               render={(props) => (
                 <NewsTable {...props} role={role ? role : "writer"} />
               )}
             />
             <Route path="/tv-shows" component={TvComponent} />
             <Route path="/users" component={UsersTable} />
-            <Route path="/settings" render={(props) => (<Settings {...props} user={user}/>)} />
+            <Route
+              path="/settings"
+              render={(props) => <Settings {...props} user={user} />}
+            />
           </Switch>
           <FloatingActionButtons
             onClick={() => {
               if (window.location.pathname === "/users") {
                 setOpenNewsModal(false);
-                setOpenTvModal(false);
+                setOpenTVModal(false);
                 setOpenUserModal(true);
                 return;
               }
@@ -308,12 +316,12 @@ const Dashboard = () => {
                 setOpenTVModal(true);
                 return;
               }
+
               setOpenUserModal(false);
               setOpenTVModal(false);
               setOpenNewsModal(true);
-              console.log("state", openNewsModal, openUserModal);
             }}
-            style={{ display: window.location.pathname === "/" ? "none" : "" }}
+            style={{ display: window.location.pathname !== "/" ? "" : "none" }}
           />
         </main>
       </div>
